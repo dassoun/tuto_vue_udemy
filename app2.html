@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <script src="vue2.5.17.js"></script>
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <title>Hello Vue.js</title>
+    </head>
+    <body>
+        <div id="app">
+            <my-card>
+                <h3 slot="cardheader">Passer du contenu ici</h3>
+                <div slot="cardbody">Visitez meansjs.fr</div>
+            </my-card>
+            <hr>
+
+            <h2>Utilisateurs</h2>
+            <user-list v-bind:data="users" v-bind:users-coming="usersWhoWillCome"></user-list>
+            
+            <div v-for="user in usersWhoWillCome">
+                {{user.id}} - {{user.email}}
+            </div>
+        </div>
+        
+        <script>
+            Vue.component('my-card', {
+                template: '<div><slot name="cardheader">Titre par défaut</slot><slot name="cardbody">Contenu par défaut</slot></div>'
+            });
+            
+            Vue.component('user-list', {
+                template: '<div>\
+                <ul><li v-for="user in data"><user-details v-bind:usr="user" v-on:accept="registerUser(user)"></user-details></li></ul>\
+                </div>',
+                props: ['data', 'usersComing'],
+                methods: {
+                    registerUser: function(user) {
+                        this.usersComing.push(user);
+                        console.log(user.username);
+                    }
+                }
+            });
+
+            Vue.component('user-details', {
+                template: '<div>id: {{usr.id}}, ville: {{usr.address.city}}, email: {{usr.email}} <button v-on:click="acceptInvitation">accept. invit.</button></div>',
+                props: ['usr'],
+                methods: {
+                    acceptInvitation: function() {
+                        this.$emit('accept');
+                    }
+                }
+            });
+
+            var vm = new Vue({
+                el: '#app',
+                data: {
+                    title: 'Lifecycle hooks',
+                    usersUrl: 'https://jsonplaceholder.typicode.com/users',
+                    users: [],
+                    usersWhoWillCome: []
+                },
+                created: function() {
+                    axios.get(this.usersUrl)
+                        .then(function(response) {
+                            vm.users = response.data;
+                            console.log(vm.users);
+                        })
+                }
+            });
+        </script>
+    </body>
+</html>

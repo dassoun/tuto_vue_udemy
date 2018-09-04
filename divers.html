@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script src="vue2.5.17.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min.js"></script>
+
+    <title>Hello Vue.js</title>
+</head>
+
+<body>
+    <div id="app">
+        {{about | shorten}}
+        <br />
+        {{waysToContact}}
+
+        <div>
+            S'inscrire à une newsletter : <input type="text" placeholder="votre adresse email" v-model="emailForNewsletter">
+            <button v-bind:disabled="emailAddressInvalid">Inscription</button>
+        </div>
+
+        <div>
+            <h2>Votre avis</h2>
+            <div>
+                <input type="text" placeholder="votre avis" v-model="opinion">
+                {{opinionResult}}
+            </div>
+        </div>
+
+        <div>
+            <h2>Chercher un utilisateur Github</h2>
+            <div>
+                <input type="text" placeholder="utilisateur github" v-model="githubUser">
+                {{githubUserResult}}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        
+        var vm = new Vue({
+            el: '#app',
+            data: {
+               about: 'Vue (prononcé /vjuː/, comme le terme anglais view) est un framework évolutif pour construire des interfaces utilisateur. À la différence des autres frameworks monolithiques, Vue a été conçu et pensé pour pouvoir être adopté de manière incrémentale. Le cœur de la bibliothèque est concentré uniquement sur la partie vue, et il est vraiment simple de l’intégrer avec d’autres bibliothèques ou projets existants. D’un autre côté, Vue est tout à fait capable de faire tourner des applications web monopages quand il est couplé avec des outils modernes et des bibliothèques complémentaires.',
+               email: 'bill@ms.com',
+               phone: '06 19 56 45 78',
+               emailForNewsletter: '',
+               opinion: '',
+               opinionResult: '',
+               githubUser: '',
+               githubUserResult: ''
+            },
+            filters: {
+                shorten: function(value) {
+                    if(value.length < 30) {
+                        return value;
+                    }
+                    return value.slice(0, 30) + '...';
+                }
+            },
+            computed: {
+                waysToContact: function() {
+                    return 'email : ' + this.email + ' tel : ' + this.phone;
+                },
+                emailAddressInvalid: function() {
+                    // if(this.emailForNewsletter.length < 2 || this.emailForNewsletter.indexOf('@') === -1 || this.emailForNewsletter.indexOf('.') === -1) {
+                    //     return true;
+                    // } else {
+                    //     return false;
+                    // }
+
+                    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                    return !re.test(String(this.emailForNewsletter).toLowerCase());
+                }
+            },
+            watch: {
+                opinion: function(newValue) {
+                    if(newValue.indexOf('azerty') !== -1) {
+                        this.opinionResult = 'Restez poli !';
+                    } else {
+                        this.opinionResult = '';
+                    }
+                },
+                // githubUser: function(username) {
+                //     axios.get('https://api.github.com/users/' + username)
+                //         .then(function(data) {
+                //             console.log(data);
+                //         });
+                // }
+                githubUser: _.debounce(function(username) {
+                            axios.get('https://api.github.com/users/' + username).then(function(data) { console.log(data); })
+                        }
+                    , 700)
+            }
+        })
+    </script>
+</body>
+
+</html>
